@@ -1,0 +1,22 @@
+<scheme name="_@user_Darcula" version="142" parent_scheme="Darcula">
+  <metaInfo>
+    <property name="created">2019-02-20T03:01:36</property>
+    <property name="ide">PyCharmCore</property>
+    <property name="ideVersion">2019.1.0.0</property>
+    <property name="modified">2019-04-16T19:54:30</property>
+    <property name="originalScheme">Darcula</property>
+  </metaInfo>
+  <colors>
+    <option name="FILESTATUS_COPIED" value="629755" />
+    <option name="FILESTATUS_IDEA_FILESTATUS_IGNORED" value="546650" />
+    <option name="FILESTATUS_RENAMED" value="3a8484" />
+    <option name="TEARLINE_COLOR" value="6362a3" />
+  </colors>
+  <attributes>
+    <option name="TYPO">
+      <value>
+        <option name="EFFECT_TYPE" value="2" />
+      </value>
+    </option>
+  </attributes>
+</scheme>
