@@ -1,14 +1,13 @@
 <scheme name="_@user_Default" version="142" parent_scheme="Default">
+  <option name="FONT_SCALE" value="0.75" />
   <metaInfo>
     <property name="created">2019-02-14T22:41:54</property>
     <property name="ide">PyCharmCore</property>
     <property name="ideVersion">2019.1.0.0</property>
-    <property name="modified">2019-02-15T02:05:25</property>
+    <property name="modified">2019-12-12T20:21:03</property>
     <property name="originalScheme">Default</property>
   </metaInfo>
-  <attributes>
-    <option name="TEXT">
-      <value />
-    </option>
-  </attributes>
+  <option name="LINE_SPACING" value="1.0" />
+  <option name="EDITOR_FONT_SIZE" value="12" />
+  <option name="EDITOR_FONT_NAME" value="Source Code Pro" />
 </scheme>
