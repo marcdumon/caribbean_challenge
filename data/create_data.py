@@ -14,6 +14,7 @@ import rasterio
 import rasterstats
 from rasterio.mask import mask
 from scipy import ndimage
+from scipy.spatial.distance import pdist, squareform
 from shapely.geometry import Polygon, MultiPolygon
 from skimage import measure
 from skimage.color import rgb2gray
@@ -268,7 +269,48 @@ def augment_dataset(fp_processed):
 
             cv.imwrite(fp_processed + f'train_valid_test_augmented/{row["id"]}_{flip}_{rot}.png', img)
             print(row['id'], end=' ', flush=True)
-        dataset.to_csv(fp_processed + f'{ds}_aug.csv')
+        dataset.to_csv(fp_processed + f'{ds}.csv')
+
+
+def add_neighbours(n_neighbours=20):
+    fp = "/media/md/Development/My_Projects/drivendata_open_ai_caribbean_challenge/data/processed/"
+    tvt = pd.read_csv(fp + 'train_valid_test.csv')
+    tvt = tvt[['id', 'x', 'y', 'label']]
+    tvt = tvt.set_index('id')
+    dist = pdist(tvt[['x', 'y']].values, metric='euclidean')
+    dist_matrix = squareform(dist)
+    distance_df = pd.DataFrame(dist_matrix, index=tvt.index, columns=tvt.index)
+
+    all_features = pd.DataFrame()
+    for tvt_id in tvt.index:
+        # Calculate the distances from the closest n_neighbours neighbours
+        all_distances = distance_df[tvt_id].sort_values()
+        neighbours_distance = all_distances.iloc[:n_neighbours + 1]
+        neighbours_distance = pd.DataFrame(neighbours_distance.iloc[:n_neighbours + 1]).transpose()
+        neighbours_distance.columns = [f'd_{i}' for i in range(n_neighbours + 1)]
+        # Calculate the labels from the closest n_neighbours neighbours
+        neighbours_labels = pd.DataFrame(tvt.loc[all_distances.iloc[:n_neighbours + 1].index, ['label']]).transpose()
+        neighbours_labels.columns = [f'l_{i}' for i in range(n_neighbours + 1)]
+        neighbours_labels.index = [tvt_id]
+        feature = pd.concat([neighbours_distance, neighbours_labels], axis=1)
+        all_features = pd.concat([all_features, feature])
+    all_features = all_features.drop(columns=['d_0', 'l_0'])  # Delete columns otherwise leaking labels !
+
+    # Merge
+    print('merging train')
+    train = pd.read_csv(fp + 'train.csv')
+    train_plus = pd.merge(train, all_features, left_on='id', right_on=all_features.index)
+    train_plus.to_csv(fp + 'train.csv')
+
+    print('merging valid')
+    valid = pd.read_csv(fp + 'valid.csv')
+    valid_plus = pd.merge(valid, all_features, left_on='id', right_on=all_features.index)
+    valid_plus.to_csv(fp + 'valid.csv')
+
+    print('merging test')
+    test = pd.read_csv(fp + 'test.csv')
+    test_plus = pd.merge(test, all_features, left_on='id', right_on=all_features.index)
+    test_plus.to_csv(fp + 'test.csv')
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -291,3 +333,6 @@ if __name__ == '__main__':
 
     # Augmentation
     # augment_dataset(fp_p)
+
+    # Additional Features
+    # add_neighbours(n_neighbours=20)
