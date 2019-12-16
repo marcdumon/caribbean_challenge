@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import rasterio
 import rasterstats
+from pandas import CategoricalDtype
 from rasterio.mask import mask
 from scipy import ndimage
 from scipy.spatial.distance import pdist, squareform
@@ -19,6 +20,11 @@ from shapely.geometry import Polygon, MultiPolygon
 from skimage import measure
 from skimage.color import rgb2gray
 from skimage.draw import polygon_perimeter
+
+pd.options.display.max_columns = 15
+pd.options.display.width = 0
+pd.set_option('expand_frame_repr', True)
+pd.options.mode.chained_assignment = None
 
 
 def crop_and_save_roofs(fp_interim='', fp_processed='', size=500):
@@ -272,9 +278,8 @@ def augment_dataset(fp_processed):
         dataset.to_csv(fp_processed + f'{ds}.csv')
 
 
-def add_neighbours(n_neighbours=20):
-    fp = "/media/md/Development/My_Projects/drivendata_open_ai_caribbean_challenge/data/processed/"
-    tvt = pd.read_csv(fp + 'train_valid_test.csv')
+def add_neighbours(fp_processed, n_neighbours=20):
+    tvt = pd.read_csv(fp_processed + 'train_valid_test.csv')
     tvt = tvt[['id', 'x', 'y', 'label']]
     tvt = tvt.set_index('id')
     dist = pdist(tvt[['x', 'y']].values, metric='euclidean')
@@ -298,19 +303,74 @@ def add_neighbours(n_neighbours=20):
 
     # Merge
     print('merging train')
-    train = pd.read_csv(fp + 'train.csv')
+    train = pd.read_csv(fp_processed + 'train.csv', index_col=0)
     train_plus = pd.merge(train, all_features, left_on='id', right_on=all_features.index)
-    train_plus.to_csv(fp + 'train.csv')
+    train_plus.to_csv(fp_processed + 'train.csv')
 
     print('merging valid')
-    valid = pd.read_csv(fp + 'valid.csv')
+    valid = pd.read_csv(fp_processed + 'valid.csv', index_col=0)
     valid_plus = pd.merge(valid, all_features, left_on='id', right_on=all_features.index)
-    valid_plus.to_csv(fp + 'valid.csv')
+    valid_plus.to_csv(fp_processed + 'valid.csv')
 
     print('merging test')
-    test = pd.read_csv(fp + 'test.csv')
+    test = pd.read_csv(fp_processed + 'test.csv', index_col=0)
     test_plus = pd.merge(test, all_features, left_on='id', right_on=all_features.index)
-    test_plus.to_csv(fp + 'test.csv')
+    test_plus.to_csv(fp_processed + 'test.csv')
+
+
+def preprocess_features(fp_processed):
+    # Load and merge the datasets
+    train = pd.read_csv(fp_processed + 'train.csv', index_col=0)
+    valid = pd.read_csv(fp_processed + 'valid.csv', index_col=0)
+    test = pd.read_csv(fp_processed + 'test.csv', index_col=0)
+    #   For easier splitting afterwards
+    train['dataset'] = 'train'
+    valid['dataset'] = 'valid'
+    test['dataset'] = 'test'
+    tvt = pd.concat([train, valid, test])
+
+    # Normalize continuous features
+    continuous_cols = ['area', 'complexity', 'z_min', 'z_max', 'z_median', 'z_count', 'z_majority', 'z_minority',
+                       'z_unique', 'z_range', 'z_sum']
+    for col in continuous_cols:
+        mu = tvt[col].mean()
+        sigma = tvt[col].std()
+        tvt.loc[:, col] = (tvt[col] - mu) / sigma
+
+    # Normalize distances
+    mu = tvt.loc[:, 'd_1':'d_19'].values.mean()
+    sigma = tvt.loc[:, 'd_1':'d_19'].values.std()
+    for i in range(1, 21):
+        tvt.loc[:, f'd_{i}'] = (tvt[f'd_{i}'] - mu) / sigma
+
+    # Encode categories
+    #   First handle nan, otherwise cat.code for nan is -1, resulting in error in ebedding (index out of range: -1)
+    tvt = tvt.fillna('unknown')
+
+    labels = ['concrete_cement', 'healthy_metal', 'incomplete', 'irregular_metal', 'other']
+    countries = ['colombia', 'guatemala', 'st_lucia']
+    places = ['borde_rural', 'borde_soacha', 'castries', 'dennery', 'gros_islet', 'mixco_1_and_ebenezer', 'mixco_3']
+
+    countries_cat_type = CategoricalDtype(categories=countries, ordered=True)
+    places_cat_type = CategoricalDtype(categories=places, ordered=True)
+    labels_cat_type = CategoricalDtype(categories=labels + ['unknown'], ordered=True)  # +['unknown] for the nan's in neighbour labels
+
+    tvt.loc[:, 'country'] = tvt.loc[:, 'country'].astype(str).astype(countries_cat_type).cat.codes
+    tvt.loc[:, 'place'] = tvt.loc[:, 'place'].astype(places_cat_type).cat.codes
+    tvt.loc[:, 'verified'] = tvt.loc[:, 'verified'].astype(int)
+    for i in range(1, 21):
+        tvt.loc[:, f'l_{i}'] = tvt.loc[:, f'l_{i}'].astype(labels_cat_type).cat.codes
+
+    # Output
+    tvt.loc[:, 'label'] = tvt.loc[:, 'label'].astype(labels_cat_type).cat.codes
+
+    # split and save
+    train = tvt[tvt['dataset'] == 'train']
+    valid = tvt[tvt['dataset'] == 'valid']
+    test = tvt[tvt['dataset'] == 'test']
+    train.to_csv(fp_processed+'train.csv')
+    valid.to_csv(fp_processed+'valid.csv')
+    test.to_csv(fp_processed+'test.csv')
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -335,4 +395,7 @@ if __name__ == '__main__':
     # augment_dataset(fp_p)
 
     # Additional Features
-    # add_neighbours(n_neighbours=20)
+    # add_neighbours(fp_p,n_neighbours=20)
+
+    # Pre-Process features
+    # preprocess_features(fp_p)
