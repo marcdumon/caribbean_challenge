@@ -3,33 +3,21 @@
 # src - create_data.py
 # md
 # --------------------------------------------------------------------------------------------------------
-
-"""
-This script creates all the necessary train, valid and test files in /media/md/Datasets/drivendata_open_aI_caribbean_challenge/processed
-    - reads the interim tiff files from the interim directory
-    - crops the roofs according to the geometry data from the .geojson files from interim directory
-    - saves the roofs images in the train or test directory
-    - creates the train_valid.csv and test.csv files
-    - clean-up
-"""
-import os
 import csv
-from time import sleep
+import os
 
-import pandas as pd
+import cv2 as cv
 import geopandas as gpd
+import numpy as np
+import pandas as pd
 import rasterio
 import rasterstats
 from rasterio.mask import mask
+from scipy import ndimage
 from shapely.geometry import Polygon, MultiPolygon
-import numpy as np
-import cv2 as cv
 from skimage import measure
 from skimage.color import rgb2gray
 from skimage.draw import polygon_perimeter
-from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
-import albumentations as albu
 
 
 def crop_and_save_roofs(fp_interim='', fp_processed='', size=500):
@@ -261,39 +249,26 @@ def split_balance_dataset(fp_processed, samples_per_label=5000, valid_pct=.3):
     test.to_csv(fp_processed + 'test.csv')
 
 
-# Fist split then augment! Otherwise the validation set contains augmented train images !!!!!!!
-def augmentations(fp_processed, ):
-    def augment(p=.5):
-        return albu.Compose([
-            albu.Rotate((-180, 180), p=1),
-            albu.OneOf(
-                [albu.HorizontalFlip(),
-                 albu.VerticalFlip()], p=.9),
-            albu.OneOf([
-                albu.RandomBrightnessContrast((-0.3, 0.2), (-0.3, 0.2), p=1),
-                albu.RandomGamma((20, 200), p=.9),
-                albu.RGBShift(40, 40, 40, p=.9)
-            ], p=.5),
-            albu.OneOf([
-                #     # albu.ElasticTransform(alpha=120, sigma=120 * 0.05, alpha_affine=120 * 0.03),
-                albu.GridDistortion(num_steps=5, distort_limit=.2),
-                albu.OpticalDistortion(distort_limit=.5, shift_limit=22.5, p=.8),
-            ], p=.2),
-            albu.ShiftScaleRotate(p=.6),
-            # albu.Resize(512, 512, always_apply=True),
-        ])
+def augment_dataset(fp_processed):
+    flips = ['non', 'ver', 'hor', 'bot']
+    for ds in ['train', 'valid', 'test']:
+        print(f'\nStart augmenting {ds}')
+        dataset = pd.read_csv(fp_processed + f'{ds}.csv', index_col=0)
+        for i, row in dataset.iterrows():
+            img = cv.imread(fp_processed + f'train_valid_test_contours/{row["id"]}.png')
+            flip = flips[np.random.randint(4)]
+            rot = np.random.randint(360)
+            if flip == 'non': pass
+            if flip == 'ver': img = cv.flip(img, 0)
+            if flip == 'hor': img = cv.flip(img, 1)
+            if flip == 'bot': img = cv.flip(img, -1)
+            img = ndimage.rotate(img, rot, reshape=False, mode='wrap')
+            img = cv.resize(img, (512, 512))
+            dataset.loc[i, 'id_aug'] = f'{row["id"]}_{flip}_{rot}'
 
-    for ds in ['train_balanced', 'valid', 'test']:
-        # for ds in [ 'train_balanced_verified', 'valid', 'test']:
-        # for ds in [ 'test']:
-        dataset = pd.read_csv(fp_processed + f'{ds}.csv')
-        for _, row in dataset.iterrows():
-            img = cv.imread(fp_processed + f'train_valid_test/{row["old_id"]}.png')
-            aug = augment(p=1)
-            i = {'image': img}
-            img = aug(**i)['image']
-            cv.imwrite(fp_processed + f'train_valid_test_augmented/{row["id"]}.png', img)
+            cv.imwrite(fp_processed + f'train_valid_test_augmented/{row["id"]}_{flip}_{rot}.png', img)
             print(row['id'], end=' ', flush=True)
+        dataset.to_csv(fp_processed + f'{ds}_aug.csv')
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -311,11 +286,8 @@ if __name__ == '__main__':
     # Cleanup
     # cleanup_train_valid_test(fp_p)
 
-    # Split train / valid
-    # split_train_valid_test(0.3, fp_p)
-
-    # Balance
+    # Split and balance
     # split_balance_dataset(fp_p, 10000, valid_pct=.30)
 
     # Augmentation
-    # augmentations(fp_p)
+    # augment_dataset(fp_p)
