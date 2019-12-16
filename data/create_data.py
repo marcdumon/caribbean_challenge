@@ -28,8 +28,6 @@ from skimage import measure
 from skimage.color import rgb2gray
 from skimage.draw import polygon_perimeter
 from sklearn.model_selection import train_test_split
-
-from my_tools.my_toolbox import MyImageTools as mit
 import matplotlib.pyplot as plt
 import albumentations as albu
 
@@ -122,7 +120,8 @@ def crop_and_save_roofs(fp_interim='', fp_processed='', size=500):
                 # Remove profile keys that doen't exist in PNG file
                 [profile.pop(key, None) for key in ['blockxsize', 'blockysize', 'tiled', 'compress', 'interleave']]
                 # Save the box to png file
-                box = box[:3, ::]  # destroy the alpha channel for saving from 4*520*520 to 3*520*520
+                box = box[:3, ::]  # destroy the alpha channel for saving: 4*520*520 to 3*520*520
+
                 with rasterio.open(f'{fp_processed}train_valid_test_areas/{roof_id}.png', 'w', **profile) as png_file:
                     png_file.write(box)
 
@@ -132,20 +131,26 @@ def crop_and_save_roofs(fp_interim='', fp_processed='', size=500):
                 roof = roof.transpose(1, 2, 0)
                 # Draw the contours
                 roof_gray = rgb2gray(roof)  # 520*520
-                contours = measure.find_contours(roof_gray, .010)
+                contours = measure.find_contours(roof_gray, .01)
                 #   Assuming the roof contour is the fist contour, others are just artifacts
-                if len(contours) > 1:
-                    contour = contours[0]
+
+                if len(contours) == 0:  # The geometry lies completely outside the box. Draw contour around the box
+                    h = np.arange(1, box.shape[1])
+                    w = np.arange(1, box.shape[1])
+                    s = min(box.shape[1:])  # the smallest x,y coordinate of box
+                    h_coord = np.concatenate([h, [3] * s, h, [max(h) - 3] * s])
+                    w_coord = np.concatenate([[3] * s, w, [max(w) - 3] * s, w])
+                    contour = np.array([[x, y] for x, y in zip(h_coord, w_coord)])
+
                 else:
                     contour = contours[0]
+
                 #   Draw the contour with line_size in the box
-                line_size = 3
+                line_size = [-2, -1, 1, 2]
                 line_color = [255, 0, 0]  # Red
                 box = box.transpose(1, 2, 0)  # from 4*520*520 to 520*520*3
-                for l in range(1, line_size + 1):
-                    rr, cc = polygon_perimeter(contour[:, 0] + l, contour[:, 1], shape=box.shape, clip=True)
-                    box[rr, cc, :3] = [line_color]
-                    rr, cc = polygon_perimeter(contour[:, 0] + l, contour[:, 1] + l, shape=box.shape, clip=True)
+                for l in line_size:
+                    rr, cc = polygon_perimeter(contour[:, 0] + l, contour[:, 1] + l, shape=box.shape, clip=False)
                     box[rr, cc, :3] = [line_color]
 
                 # Safe the box with contour
@@ -175,23 +180,21 @@ def crop_and_save_roofs(fp_interim='', fp_processed='', size=500):
                         max_area = max(max_area, roof_geometry[l].area)
                         if max_area == roof_geometry[l].area: i = l
                     complexity = len(roof_geometry[i].exterior.coords.xy[0]) - 1
-                x = roof_geometry.centroid.x
+                h = roof_geometry.centroid.x
                 y = roof_geometry.centroid.y
                 # Add the zonal_stats for the roof
                 stats = ['min', 'max', 'median', 'count', 'majority', 'minority', 'unique', 'range', 'sum']
                 zonal_stats = rasterstats.zonal_stats(roof_geometry, f'{fp}interim/stac/{country}/{place}/{place}_ortho-cog.tif', stats=stats, nodata=-999)
                 # append roof features to csv file
-                row = [roof_id, country, place, roof_verified, area, complexity, x, y] + [zonal_stats[0][k] for k in zonal_stats[0]] + [roof_label, is_test]
+                row = [roof_id, country, place, roof_verified, area, complexity, h, y] + [zonal_stats[0][k] for k in zonal_stats[0]] + [roof_label, is_test]
                 with open(fp_processed + 'train_valid_test.csv', 'a') as csv_file:
                     writer = csv.writer(csv_file)
                     writer.writerow(row)
-                # delete the aux.xml file
 
             print()
 
 
 def cleanup_train_valid_test(fp_processed):
-    # Todo: are the very small area's not the wrong polynom from multipolynmoms?
     tvt = pd.read_csv(fp_processed + 'train_valid_test.csv')
     # Remove not verified healthy_metal
     tvt = tvt[~((tvt['label'] == 'healthy_metal') & (tvt['verified'] == False))]
@@ -304,11 +307,10 @@ if __name__ == '__main__':
     # Define the filepaths
     fp = '/media/md/Development/My_Projects/drivendata_open_ai_caribbean_challenge/data/'
     fp_i = f'{fp}interim/'
-    # fp_p = f'{fp}processed/'
-    fp_p = f'{fp}processed/TEMP/'
+    fp_p = f'{fp}processed/'
 
     # Create the dataset
-    crop_and_save_roofs(fp_i, fp_p)
+    # crop_and_save_roofs(fp_i, fp_p, size=500)
 
     # Cleanup
     # cleanup_train_valid_test(fp_p)
