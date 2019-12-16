@@ -198,71 +198,67 @@ def cleanup_train_valid_test(fp_processed):
     tvt = pd.read_csv(fp_processed + 'train_valid_test.csv')
     # Remove not verified healthy_metal
     tvt = tvt[~((tvt['label'] == 'healthy_metal') & (tvt['verified'] == False))]
-    # Remove area < 2.5, but not for test
-    tvt = tvt[(tvt['area'] > 2.5) | (tvt['test'] == True)]
+    # Remove healthy_metal area < 2.5,
+    tvt = tvt[~((tvt['area'] < 2.5) & (tvt['label'] == 'healthy_metal'))]
     tvt.to_csv(fp_processed + 'train_valid_test_clean.csv')
 
 
-def split_train_valid_test(valid_pct, fp_processed):
-    # Split before augmentation:
-    #   - Label distribution from valid should reflect the test set
-    #   - Avoids that augmented images from the same base image are in both train and valid set
-    tvt = pd.read_csv(fp_processed + 'train_valid_test_clean.csv', index_col=0)
+def split_balance_dataset(fp_processed, samples_per_label=5000, valid_pct=.3):
+    """
+    Splits train_valid_test dataset into train_valid and test.
+    Creates a valid dataset with the same distribution of labels as the full dataset and as many unverified roofs as possible,
+    becasue it's better to have the verified roofs in the training dataset.
+
+    :param fp_processed:
+    :param samples_per_label:
+    :param valid_pct:
+    :return:
+    """
+    tvt = pd.read_csv(fp_processed + 'train_valid_test.csv')
+    # Split train, valid, test
     tv = tvt[tvt['test'] == False]
-    valid_nr = int(len(tv) * valid_pct)
-    # The test set doesn't contain roofs from Castries and Gros Islet, so exclude them in the valid set
-    v = tv.query('place not in ["castries", "gros_islet"]')
-    _, valid = train_test_split(v, test_size=valid_nr, stratify=(v.loc[:, ['label', 'place']]))
-    valid_ids = valid['id']
-    train = tv[~tv['id'].isin(valid_ids)]
+    labels = set(tv['label'])
     test = tvt[tvt['test'] == True]
+    #   The valid dataset needs to have the same label distribution as the full dataset
+    #   Better put as many unverified roofs as possible in valid and train with verified roofs
+    planned_distribution = tv['label'].value_counts(normalize=False)
+    planned_distribution = (round(planned_distribution * .3)).astype(int)
+    valid = pd.DataFrame(columns=tv.columns)
+    tv_unverified = tv[tv['verified'] == False]
+    for label in labels:
+        count = len(tv_unverified[tv_unverified['label'] == label])
+        if planned_distribution[label] <= count:  # we have enough unverified roofs
+            v_label = tv_unverified[tv_unverified['label'] == label].sample(planned_distribution[label])
+            valid = pd.concat([valid, v_label])
+        else:  # we don't have enough unverified roofs => also need verified roofs
+            v_label_unverified = tv_unverified[tv_unverified['label'] == label]
+            missing = planned_distribution[label] - len(v_label_unverified)
+            v_label_verified = tv[(tv['label'] == label) & (tv['verified'] == True)].sample(missing)
+            valid = pd.concat([valid, v_label_unverified, v_label_verified])
+    #   Delete the valids from the train
+    train = tv[~(tv['id'].isin(valid['id']))]
 
-    # Add old_id # Todo: spagetti code.... need this column in augmentation() + train_balanced[old_id] is added in balance
-    valid.loc[:, 'old_id'] = valid[
-        'id']  # Todo: warning: A value is trying to be set on a copy of a slice from a DataFrame. Try using .loc[row_indexer,col_indexer] = value instead
-    test.loc[:, 'old_id'] = test['id']
+    # Balance train
+    train_balanced = pd.DataFrame(columns=train.columns)
+    for label in labels:
+        train_label = train[train['label'] == label]
+        if len(train_label) >= samples_per_label:
+            train_label = train_label.sample(samples_per_label, replace=False)
+            train_balanced = pd.concat([train_balanced, train_label])
+        else:  # not enough samples, need oversampling
+            train_label = train_label.sample(samples_per_label, replace=True)
+            train_label.sort_values('id', inplace=True)
+            train_balanced = pd.concat([train_balanced, train_label])
 
-    train.to_csv(fp_processed + 'train.csv')
+    # Reset_indexes
+    train_balanced.reset_index(drop=True, inplace=True)
+    valid.reset_index(drop=True, inplace=True)
+    test.reset_index(drop=True, inplace=True)
+
+    # Save
+    train_balanced.to_csv(fp_processed + 'train.csv')
     valid.to_csv(fp_processed + 'valid.csv')
     test.to_csv(fp_processed + 'test.csv')
-
-
-def balance(fp_processed, samples_per_label=5000, only_verified=False):
-    train = pd.read_csv(fp_processed + 'train.csv', index_col=0)
-    if only_verified:
-        train = train[train['verified'] == True]
-    labels = train['label'].unique()
-    trn = pd.DataFrame()
-    for label in labels:
-        print(label)
-        trn_label = train[train['label'] == label]
-        if len(trn_label) < samples_per_label:  # not enough samples, make sure that we have all samples, then add oversampele
-            print(trn_label)
-            tv_label_oversamples = train[train['label'] == label].sample(samples_per_label - len(trn_label), replace=True)
-            print(tv_label_oversamples)
-            trn_label = pd.concat([trn_label, tv_label_oversamples])
-            print(trn_label)
-        else:  # we have enough samples, no need to oversample
-            trn_label = trn_label.sample(samples_per_label)
-            print(trn_label)
-        print('-' * 150)
-        trn_label = trn_label.sort_values('id').reset_index(drop=True)
-        trn = pd.concat([trn, trn_label])
-        print('-' * 150)
-        print(len(trn))
-        print('-' * 150)
-
-    # Keep old id and create new one
-    trn = trn.reset_index(drop=True).sort_values('id')
-    trn['old_id'] = trn['id']
-    trn['id'] = trn['old_id'] + '_' + trn.index.map(str)
-    print('-' * 150)
-    print(len(trn))
-    print('-' * 150)
-    if only_verified:
-        trn.to_csv(fp_processed + 'train_balanced_verified.csv')
-    else:
-        trn.to_csv(fp_processed + 'train_balanced.csv')
 
 
 # Fist split then augment! Otherwise the validation set contains augmented train images !!!!!!!
@@ -319,7 +315,7 @@ if __name__ == '__main__':
     # split_train_valid_test(0.3, fp_p)
 
     # Balance
-    # balance(fp_p, 10000, False)
+    # split_balance_dataset(fp_p, 10000, valid_pct=.30)
 
     # Augmentation
     # augmentations(fp_p)
