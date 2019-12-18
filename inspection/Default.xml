@@ -14,6 +14,7 @@
       <list>
         <option value="backends" />
         <option value="int.astype" />
+        <option value="torch.optim.adam.Adam.param_groups" />
       </list>
     </option>
   </inspection_tool>
