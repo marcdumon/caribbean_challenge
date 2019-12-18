@@ -203,6 +203,7 @@ def split_balance_dataset(fp_processed, samples_per_label=5000, valid_pct=.3):
     Splits train_valid_test dataset into train_valid and test.
     Creates a valid dataset with the same distribution of labels as the full dataset and as many unverified roofs as possible,
     becasue it's better to have the verified roofs in the training dataset.
+    The test dataset doesn't contain roofs from the places Castries and Gros Islet, therefore the valid dataset also exclude these places.
 
     :param fp_processed:
     :param samples_per_label:
@@ -217,9 +218,11 @@ def split_balance_dataset(fp_processed, samples_per_label=5000, valid_pct=.3):
     #   The valid dataset needs to have the same label distribution as the full dataset
     #   Better put as many unverified roofs as possible in valid and train with verified roofs
     planned_distribution = tv['label'].value_counts(normalize=False)
-    planned_distribution = (round(planned_distribution * .3)).astype(int)
+    planned_distribution = (round(planned_distribution * valid_pct)).astype(int)
     valid = pd.DataFrame(columns=tv.columns)
     tv_unverified = tv[tv['verified'] == False]
+    # Valid should include only places that are also in Test
+    tv_unverified = tv[tv['place'].isin(set(test['place']))]
     for label in labels:
         count = len(tv_unverified[tv_unverified['label'] == label])
         if planned_distribution[label] <= count:  # we have enough unverified roofs
@@ -228,7 +231,9 @@ def split_balance_dataset(fp_processed, samples_per_label=5000, valid_pct=.3):
         else:  # we don't have enough unverified roofs => also need verified roofs
             v_label_unverified = tv_unverified[tv_unverified['label'] == label]
             missing = planned_distribution[label] - len(v_label_unverified)
-            v_label_verified = tv[(tv['label'] == label) & (tv['verified'] == True)].sample(missing)
+            v_label_verified = tv[(tv['label'] == label) &
+                                  (tv['verified'] == True) &
+                                  tv['place'].isin(set(test['place']))].sample(missing)
             valid = pd.concat([valid, v_label_unverified, v_label_verified])
     #   Delete the valids from the train
     train = tv[~(tv['id'].isin(valid['id']))]
@@ -251,9 +256,9 @@ def split_balance_dataset(fp_processed, samples_per_label=5000, valid_pct=.3):
     test.reset_index(drop=True, inplace=True)
 
     # Save
-    train_balanced.to_csv(fp_processed + 'train.csv')
-    valid.to_csv(fp_processed + 'valid.csv')
-    test.to_csv(fp_processed + 'test.csv')
+    train_balanced.to_csv(fp_processed + 'train-location.csv')
+    valid.to_csv(fp_processed + 'valid-location.csv')
+    test.to_csv(fp_processed + 'test-location.csv')
 
 
 def augment_dataset(fp_processed):
@@ -270,7 +275,7 @@ def augment_dataset(fp_processed):
             if flip == 'hor': img = cv.flip(img, 1)
             if flip == 'bot': img = cv.flip(img, -1)
             img = ndimage.rotate(img, rot, reshape=False, mode='wrap')
-            img = cv.resize(img, (512, 512))
+            img = cv.resize(img, (960, 960))
             dataset.loc[i, 'id_aug'] = f'{row["id"]}_{flip}_{rot}'
 
             cv.imwrite(fp_processed + f'train_valid_test_augmented/{row["id"]}_{flip}_{rot}.png', img)
@@ -368,9 +373,9 @@ def preprocess_features(fp_processed):
     train = tvt[tvt['dataset'] == 'train']
     valid = tvt[tvt['dataset'] == 'valid']
     test = tvt[tvt['dataset'] == 'test']
-    train.to_csv(fp_processed+'train.csv')
-    valid.to_csv(fp_processed+'valid.csv')
-    test.to_csv(fp_processed+'test.csv')
+    train.to_csv(fp_processed + 'train.csv')
+    valid.to_csv(fp_processed + 'valid.csv')
+    test.to_csv(fp_processed + 'test.csv')
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -380,16 +385,16 @@ if __name__ == '__main__':
     # Define the filepaths
     fp = '/media/md/Development/My_Projects/drivendata_open_ai_caribbean_challenge/data/'
     fp_i = f'{fp}interim/'
-    fp_p = f'{fp}processed/'
+    fp_p = f'{fp}processed_hd/'
 
     # Create the dataset
-    # crop_and_save_roofs(fp_i, fp_p, size=500)
+    # crop_and_save_roofs(fp_i, fp_p, size=1200)
 
     # Cleanup
     # cleanup_train_valid_test(fp_p)
 
     # Split and balance
-    # split_balance_dataset(fp_p, 10000, valid_pct=.30)
+    split_balance_dataset(fp_p, 10000, valid_pct=.30)
 
     # Augmentation
     # augment_dataset(fp_p)
