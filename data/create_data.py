@@ -256,12 +256,12 @@ def split_balance_dataset(fp_processed, samples_per_label=5000, valid_pct=.3):
     test.reset_index(drop=True, inplace=True)
 
     # Save
-    train_balanced.to_csv(fp_processed + 'train-location.csv')
-    valid.to_csv(fp_processed + 'valid-location.csv')
-    test.to_csv(fp_processed + 'test-location.csv')
+    train_balanced.to_csv(fp_processed + 'train.csv')
+    valid.to_csv(fp_processed + 'valid.csv')
+    test.to_csv(fp_processed + 'test.csv')
 
 
-def augment_dataset(fp_processed):
+def augment_dataset(fp_processed, image_size=512):
     flips = ['non', 'ver', 'hor', 'bot']
     for ds in ['train', 'valid', 'test']:
         print(f'\nStart augmenting {ds}')
@@ -275,7 +275,7 @@ def augment_dataset(fp_processed):
             if flip == 'hor': img = cv.flip(img, 1)
             if flip == 'bot': img = cv.flip(img, -1)
             img = ndimage.rotate(img, rot, reshape=False, mode='wrap')
-            img = cv.resize(img, (960, 960))
+            img = cv.resize(img, (image_size, image_size))
             dataset.loc[i, 'id_aug'] = f'{row["id"]}_{flip}_{rot}'
 
             cv.imwrite(fp_processed + f'train_valid_test_augmented/{row["id"]}_{flip}_{rot}.png', img)
@@ -323,7 +323,7 @@ def add_neighbours(fp_processed, n_neighbours=20):
     test_plus.to_csv(fp_processed + 'test.csv')
 
 
-def preprocess_features(fp_processed):
+def preprocess_features(fp_processed, only_label=True):
     # Load and merge the datasets
     train = pd.read_csv(fp_processed + 'train.csv', index_col=0)
     valid = pd.read_csv(fp_processed + 'valid.csv', index_col=0)
@@ -334,24 +334,6 @@ def preprocess_features(fp_processed):
     test['dataset'] = 'test'
     tvt = pd.concat([train, valid, test])
 
-    # Normalize continuous features
-    continuous_cols = ['area', 'complexity', 'z_min', 'z_max', 'z_median', 'z_count', 'z_majority', 'z_minority',
-                       'z_unique', 'z_range', 'z_sum']
-    for col in continuous_cols:
-        mu = tvt[col].mean()
-        sigma = tvt[col].std()
-        tvt.loc[:, col] = (tvt[col] - mu) / sigma
-
-    # Normalize distances
-    mu = tvt.loc[:, 'd_1':'d_19'].values.mean()
-    sigma = tvt.loc[:, 'd_1':'d_19'].values.std()
-    for i in range(1, 21):
-        tvt.loc[:, f'd_{i}'] = (tvt[f'd_{i}'] - mu) / sigma
-
-    # Encode categories
-    #   First handle nan, otherwise cat.code for nan is -1, resulting in error in ebedding (index out of range: -1)
-    tvt = tvt.fillna('unknown')
-
     labels = ['concrete_cement', 'healthy_metal', 'incomplete', 'irregular_metal', 'other']
     countries = ['colombia', 'guatemala', 'st_lucia']
     places = ['borde_rural', 'borde_soacha', 'castries', 'dennery', 'gros_islet', 'mixco_1_and_ebenezer', 'mixco_3']
@@ -360,20 +342,39 @@ def preprocess_features(fp_processed):
     places_cat_type = CategoricalDtype(categories=places, ordered=True)
     labels_cat_type = CategoricalDtype(categories=labels + ['unknown'], ordered=True)  # +['unknown] for the nan's in neighbour labels
 
-    tvt.loc[:, 'country'] = tvt.loc[:, 'country'].astype(str).astype(countries_cat_type).cat.codes
-    tvt.loc[:, 'place'] = tvt.loc[:, 'place'].astype(places_cat_type).cat.codes
-    tvt.loc[:, 'verified'] = tvt.loc[:, 'verified'].astype(int)
-    for i in range(1, 21):
-        tvt.loc[:, f'l_{i}'] = tvt.loc[:, f'l_{i}'].astype(labels_cat_type).cat.codes
-
-    # Output
+    # Encode labels
     tvt.loc[:, 'label'] = tvt.loc[:, 'label'].astype(labels_cat_type).cat.codes
+
+    if not only_label:
+        # Encode categories
+        #   First handle nan, otherwise cat.code for nan is -1, resulting in error in ebedding (index out of range: -1)
+        tvt = tvt.fillna('unknown')
+
+        tvt.loc[:, 'country'] = tvt.loc[:, 'country'].astype(str).astype(countries_cat_type).cat.codes
+        tvt.loc[:, 'place'] = tvt.loc[:, 'place'].astype(places_cat_type).cat.codes
+        tvt.loc[:, 'verified'] = tvt.loc[:, 'verified'].astype(int)
+        for i in range(1, 21):
+            tvt.loc[:, f'l_{i}'] = tvt.loc[:, f'l_{i}'].astype(labels_cat_type).cat.codes
+
+        # Normalize continuous features
+        continuous_cols = ['area', 'complexity', 'z_min', 'z_max', 'z_median', 'z_count', 'z_majority', 'z_minority',
+                           'z_unique', 'z_range', 'z_sum']
+        for col in continuous_cols:
+            mu = tvt[col].mean()
+            sigma = tvt[col].std()
+            tvt.loc[:, col] = (tvt[col] - mu) / sigma
+
+        # Normalize distances
+        mu = tvt.loc[:, 'd_1':'d_19'].values.mean()
+        sigma = tvt.loc[:, 'd_1':'d_19'].values.std()
+        for i in range(1, 21):
+            tvt.loc[:, f'd_{i}'] = (tvt[f'd_{i}'] - mu) / sigma
 
     # split and save
     train = tvt[tvt['dataset'] == 'train']
     valid = tvt[tvt['dataset'] == 'valid']
     test = tvt[tvt['dataset'] == 'test']
-    train.to_csv(fp_processed + 'train.csv')
+    train.to_csv(fp_processed + 'train_.csv')
     valid.to_csv(fp_processed + 'valid.csv')
     test.to_csv(fp_processed + 'test.csv')
 
@@ -385,7 +386,7 @@ if __name__ == '__main__':
     # Define the filepaths
     fp = '/media/md/Development/My_Projects/drivendata_open_ai_caribbean_challenge/data/'
     fp_i = f'{fp}interim/'
-    fp_p = f'{fp}processed_hd/'
+    fp_p = f'{fp}processed/'
 
     # Create the dataset
     # crop_and_save_roofs(fp_i, fp_p, size=1200)
@@ -394,13 +395,13 @@ if __name__ == '__main__':
     # cleanup_train_valid_test(fp_p)
 
     # Split and balance
-    split_balance_dataset(fp_p, 10000, valid_pct=.30)
+    # split_balance_dataset(fp_p, 10000, valid_pct=.30)
 
     # Augmentation
-    # augment_dataset(fp_p)
+    # augment_dataset(fp_p, image_size=512)
 
     # Additional Features
-    # add_neighbours(fp_p,n_neighbours=20)
+    # add_neighbours(fp_p, n_neighbours=20)
 
     # Pre-Process features
-    # preprocess_features(fp_p)
+    # preprocess_features(fp_p, only_label=True)
