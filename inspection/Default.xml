@@ -15,6 +15,7 @@
         <option value="backends" />
         <option value="int.astype" />
         <option value="torch.optim.adam.Adam.param_groups" />
+        <option value="torch.optim.lr_scheduler.*" />
       </list>
     </option>
   </inspection_tool>
