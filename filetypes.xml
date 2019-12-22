@@ -4,6 +4,7 @@
     <extensionMap>
       <mapping ext="bak" type="PLAIN_TEXT" />
       <mapping pattern="T_A" type="Python" />
+      <mapping ext="yalm" type="YAML" />
     </extensionMap>
   </component>
 </application>
