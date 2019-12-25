@@ -23,6 +23,8 @@
         <option value="int.astype" />
         <option value="torch.optim.adam.Adam.param_groups" />
         <option value="torch.optim.lr_scheduler.*" />
+        <option value="tuple.title" />
+        <option value="tuple.imshow" />
       </list>
     </option>
   </inspection_tool>
