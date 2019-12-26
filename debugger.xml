@@ -7,7 +7,7 @@
     <debuggers>
       <debugger id="python">
         <configuration>
-          <option name="valuesPolicy" value="SYNC" />
+          <option name="valuesPolicy" value="ON_DEMAND" />
           <option name="watchReturnValues" value="true" />
         </configuration>
       </debugger>
