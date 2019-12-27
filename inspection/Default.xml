@@ -35,6 +35,7 @@
         <option value="tuple.title" />
         <option value="tuple.imshow" />
         <option value="Adagrad" />
+        <option value="dict.get" />
       </list>
     </option>
   </inspection_tool>
