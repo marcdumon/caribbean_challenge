@@ -36,6 +36,7 @@
         <option value="tuple.imshow" />
         <option value="Adagrad" />
         <option value="dict.get" />
+        <option value="tuple.indices" />
       </list>
     </option>
   </inspection_tool>
