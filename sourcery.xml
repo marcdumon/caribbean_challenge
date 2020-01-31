@@ -1,0 +1,6 @@
+<application>
+  <component name="SourceryConfigService">
+    <option name="pluginVersion" value="0.2.7" />
+    <option name="sourceryConfigFolder" value="$USER_HOME$/.config/sourcery" />
+  </component>
+</application>
