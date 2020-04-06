@@ -4,11 +4,11 @@
     <property name="created">2019-02-15T14:08:30</property>
     <property name="ide">PyCharmCore</property>
     <property name="ideVersion">2019.1.0.0</property>
-    <property name="modified">2020-04-06T10:46:48</property>
+    <property name="modified">2020-04-06T11:00:15</property>
     <property name="originalScheme">_@user_Github</property>
   </metaInfo>
   <option name="LINE_SPACING" value="1.0" />
-  <option name="EDITOR_FONT_SIZE" value="14" />
+  <option name="EDITOR_FONT_SIZE" value="13" />
   <option name="EDITOR_FONT_NAME" value="Source Code Pro" />
   <colors>
     <option name="CARET_COLOR" value="333333" />
