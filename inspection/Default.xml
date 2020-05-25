@@ -41,6 +41,7 @@
         <option value="Adagrad" />
         <option value="dict.get" />
         <option value="tuple.indices" />
+        <option value="dash_daq.*" />
       </list>
     </option>
   </inspection_tool>
