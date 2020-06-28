@@ -1,11 +1,15 @@
 <application>
   <component name="PrintSettings">
-    <option name="printScope" value="1" />
+    <option name="printScope" value="2" />
     <option name="COLOR_PRINTING" value="true" />
     <option name="PRINT_AS_GRAPHICS" value="false" />
     <option name="FONT_NAME" value="Courier" />
     <option name="FONT_SIZE" value="10" />
     <option name="WRAP" value="false" />
+    <option name="TOP_MARGIN" value="0.2" />
+    <option name="BOTTOM_MARGIN" value="0.2" />
+    <option name="LEFT_MARGIN" value="0.2" />
+    <option name="RIGHT_MARGIN" value="0.2" />
     <option name="DRAW_BORDER" value="false" />
   </component>
 </application>
