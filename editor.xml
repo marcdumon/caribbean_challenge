@@ -18,6 +18,10 @@
     <pattern pattern="\btodo\b.*" />
     <pattern pattern="\bfixme\b.*" />
     <pattern icon="question" pattern="\bfeat\b.*" />
-    <pattern icon="question" pattern="\bcheck:\b.*" />
+    <pattern icon="question" useCustomColors="true" pattern="\bcheck:\b.*">
+      <option name="FOREGROUND" value="ff" />
+      <option name="FONT_TYPE" value="3" />
+      <option name="ERROR_STRIPE_COLOR" value="ff" />
+    </pattern>
   </component>
 </application>
