@@ -18,6 +18,7 @@
     <option name="ignoredIdentifiers">
       <list>
         <option value="xxx.MyManager.PriorityQueue" />
+        <option value="textacy.extract" />
       </list>
     </option>
   </inspection_tool>
