@@ -6,6 +6,7 @@
       <mapping pattern="medium_article" type="Markdown" />
       <mapping ext="bak" type="PLAIN_TEXT" />
       <mapping ext="pt" type="PLAIN_TEXT" />
+      <mapping ext="pkl" type="PLAIN_TEXT" />
       <mapping pattern="T_A" type="Python" />
       <mapping ext="yalm" type="YAML" />
     </extensionMap>
