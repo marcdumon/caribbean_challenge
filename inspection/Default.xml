@@ -21,6 +21,7 @@
       <list>
         <option value="xxx.MyManager.PriorityQueue" />
         <option value="textacy.extract" />
+        <option value="bool.cumsum" />
       </list>
     </option>
   </inspection_tool>
