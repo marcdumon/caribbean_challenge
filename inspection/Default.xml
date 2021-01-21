@@ -28,6 +28,7 @@
         <option value="xxx.MyManager.PriorityQueue" />
         <option value="textacy.extract" />
         <option value="bool.cumsum" />
+        <option value="pandas.core.indexes.base.Index.*" />
       </list>
     </option>
   </inspection_tool>
