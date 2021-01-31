@@ -4,7 +4,7 @@
     <property name="created">2019-02-15T14:08:30</property>
     <property name="ide">PyCharmCore</property>
     <property name="ideVersion">2019.1.0.0</property>
-    <property name="modified">2021-01-31T12:54:17</property>
+    <property name="modified">2021-02-01T00:37:26</property>
     <property name="originalScheme">_@user_Github</property>
   </metaInfo>
   <option name="LINE_SPACING" value="1.0" />
@@ -419,12 +419,12 @@
     </option>
     <option name="DEFAULT_BRACES">
       <value>
-        <option name="FOREGROUND" value="63a35c" />
+        <option name="FOREGROUND" value="14720a" />
       </value>
     </option>
     <option name="DEFAULT_BRACKETS">
       <value>
-        <option name="FOREGROUND" value="63a35c" />
+        <option name="FOREGROUND" value="14720a" />
       </value>
     </option>
     <option name="DEFAULT_CLASS_NAME">
@@ -434,7 +434,7 @@
     </option>
     <option name="DEFAULT_COMMA">
       <value>
-        <option name="FOREGROUND" value="63a35c" />
+        <option name="FOREGROUND" value="14720a" />
       </value>
     </option>
     <option name="DEFAULT_CONSTANT">
@@ -444,12 +444,18 @@
     </option>
     <option name="DEFAULT_DOC_COMMENT">
       <value>
-        <option name="FOREGROUND" value="969896" />
+        <option name="FOREGROUND" value="777b77" />
       </value>
     </option>
     <option name="DEFAULT_DOC_COMMENT_TAG">
       <value>
         <option name="FOREGROUND" value="969896" />
+      </value>
+    </option>
+    <option name="DEFAULT_DOC_COMMENT_TAG_VALUE">
+      <value>
+        <option name="FOREGROUND" value="9ba79b" />
+        <option name="FONT_TYPE" value="3" />
       </value>
     </option>
     <option name="DEFAULT_DOC_MARKUP">
@@ -459,7 +465,7 @@
     </option>
     <option name="DEFAULT_DOT">
       <value>
-        <option name="FOREGROUND" value="63a35c" />
+        <option name="FOREGROUND" value="5ca37e" />
       </value>
     </option>
     <option name="DEFAULT_ENTITY">
@@ -536,7 +542,7 @@
     </option>
     <option name="DEFAULT_OPERATION_SIGN">
       <value>
-        <option name="FOREGROUND" value="a71d5d" />
+        <option name="FOREGROUND" value="29bd17" />
       </value>
     </option>
     <option name="DEFAULT_PARAMETER">
@@ -546,7 +552,7 @@
     </option>
     <option name="DEFAULT_PARENTHS">
       <value>
-        <option name="FOREGROUND" value="63a35c" />
+        <option name="FOREGROUND" value="14720a" />
       </value>
     </option>
     <option name="DEFAULT_PREDEFINED_SYMBOL">
@@ -556,7 +562,7 @@
     </option>
     <option name="DEFAULT_SEMICOLON">
       <value>
-        <option name="FOREGROUND" value="63a35c" />
+        <option name="FOREGROUND" value="14720a" />
       </value>
     </option>
     <option name="DEFAULT_STATIC_FIELD">
@@ -1184,12 +1190,7 @@
     </option>
     <option name="PY.BRACES">
       <value>
-        <option name="FOREGROUND" value="63a35c" />
-      </value>
-    </option>
-    <option name="PY.BRACKETS">
-      <value>
-        <option name="FOREGROUND" value="63a35c" />
+        <option name="FOREGROUND" value="1bff0a" />
       </value>
     </option>
     <option name="PY.BUILTIN_NAME">
