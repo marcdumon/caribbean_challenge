@@ -4,7 +4,7 @@
     <property name="created">2019-02-15T14:08:30</property>
     <property name="ide">PyCharmCore</property>
     <property name="ideVersion">2019.1.0.0</property>
-    <property name="modified">2021-02-01T08:38:57</property>
+    <property name="modified">2021-02-01T15:20:03</property>
     <property name="originalScheme">_@user_Github</property>
   </metaInfo>
   <option name="LINE_SPACING" value="1.0" />
@@ -590,6 +590,13 @@
     <option name="DEFAULT_VALID_STRING_ESCAPE">
       <value>
         <option name="FOREGROUND" value="183691" />
+      </value>
+    </option>
+    <option name="DELETED_TEXT_ATTRIBUTES">
+      <value>
+        <option name="FOREGROUND" value="333333" />
+        <option name="BACKGROUND" value="f0f0f0" />
+        <option name="EFFECT_TYPE" value="1" />
       </value>
     </option>
     <option name="DJANGO_COMMENT">
@@ -1704,7 +1711,7 @@
     </option>
     <option name="TEXT">
       <value>
-        <option name="FOREGROUND" value="333333" />
+        <option name="FOREGROUND" value="0" />
         <option name="BACKGROUND" value="ffffff" />
       </value>
     </option>
