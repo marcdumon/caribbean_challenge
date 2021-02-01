@@ -4,7 +4,7 @@
     <property name="created">2019-02-15T14:08:30</property>
     <property name="ide">PyCharmCore</property>
     <property name="ideVersion">2019.1.0.0</property>
-    <property name="modified">2021-02-01T00:37:26</property>
+    <property name="modified">2021-02-01T07:59:39</property>
     <property name="originalScheme">_@user_Github</property>
   </metaInfo>
   <option name="LINE_SPACING" value="1.0" />
@@ -1195,7 +1195,7 @@
     </option>
     <option name="PY.BUILTIN_NAME">
       <value>
-        <option name="FOREGROUND" value="86b3" />
+        <option name="FOREGROUND" value="33b3" />
       </value>
     </option>
     <option name="PY.CLASS_DEFINITION">
@@ -1216,7 +1216,7 @@
     </option>
     <option name="PY.DOC_COMMENT">
       <value>
-        <option name="FOREGROUND" value="a093a0" />
+        <option name="FOREGROUND" value="8080" />
       </value>
     </option>
     <option name="PY.DOT">
@@ -1262,7 +1262,7 @@
     </option>
     <option name="PY.PARAMETER">
       <value>
-        <option name="FOREGROUND" value="2f62c6" />
+        <option name="FOREGROUND" value="752fc6" />
       </value>
     </option>
     <option name="PY.PARENTHS">
@@ -1288,7 +1288,7 @@
     </option>
     <option name="PY.STRING.U">
       <value>
-        <option name="FOREGROUND" value="183691" />
+        <option name="FOREGROUND" value="8080" />
       </value>
     </option>
     <option name="PY.VALID_STRING_ESCAPE">
