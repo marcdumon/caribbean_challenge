@@ -4,7 +4,7 @@
     <property name="created">2019-02-15T14:08:30</property>
     <property name="ide">PyCharmCore</property>
     <property name="ideVersion">2019.1.0.0</property>
-    <property name="modified">2021-02-01T07:59:39</property>
+    <property name="modified">2021-02-01T08:38:57</property>
     <property name="originalScheme">_@user_Github</property>
   </metaInfo>
   <option name="LINE_SPACING" value="1.0" />
@@ -1190,7 +1190,7 @@
     </option>
     <option name="PY.BRACES">
       <value>
-        <option name="FOREGROUND" value="1bff0a" />
+        <option name="FOREGROUND" value="da0aff" />
       </value>
     </option>
     <option name="PY.BUILTIN_NAME">
@@ -1216,7 +1216,7 @@
     </option>
     <option name="PY.DOC_COMMENT">
       <value>
-        <option name="FOREGROUND" value="8080" />
+        <option name="FOREGROUND" value="4f614f" />
       </value>
     </option>
     <option name="PY.DOT">
@@ -1226,7 +1226,7 @@
     </option>
     <option name="PY.FUNCTION_CALL">
       <value>
-        <option name="FOREGROUND" value="27095" />
+        <option name="FOREGROUND" value="767d9" />
       </value>
     </option>
     <option name="PY.FUNC_DEFINITION">
