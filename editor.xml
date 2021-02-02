@@ -41,4 +41,7 @@
       <option name="ERROR_STRIPE_COLOR" value="ff" />
     </pattern>
   </component>
+  <component name="XmlFoldingSettings">
+    <option name="COLLAPSE_XML_TAGS" value="true" />
+  </component>
 </application>
