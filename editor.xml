@@ -29,7 +29,7 @@
   </component>
   <component name="TodoConfiguration">
     <pattern useCustomColors="true" pattern="\btodo\b.*">
-      <option name="FOREGROUND" value="bbbe09" />
+      <option name="FOREGROUND" value="2871a0" />
       <option name="FONT_TYPE" value="1" />
       <option name="ERROR_STRIPE_COLOR" value="7e7ef6" />
     </pattern>
