@@ -29,6 +29,8 @@
         <option value="textacy.extract" />
         <option value="bool.cumsum" />
         <option value="pandas.core.indexes.base.Index.*" />
+        <option value="mido.open_output" />
+        <option value="mido.get_output_names" />
       </list>
     </option>
   </inspection_tool>
