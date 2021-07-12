@@ -1,11 +1,4 @@
 <application>
-  <component name="AdvancedSettings">
-    <option name="settings">
-      <map>
-        <entry key="ide.tree.collapse.recursively" value="false" />
-      </map>
-    </option>
-  </component>
   <component name="GeneralSettings">
     <option name="confirmExit" value="false" />
   </component>
