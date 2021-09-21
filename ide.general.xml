@@ -7,7 +7,6 @@
     <entry key="completion.stats.show.ml.ranking.diff" value="true" />
     <entry key="async.project.view.collapse.tree.path.recursively" value="false" />
     <entry key="debugger.watches.in.variables" value="false" />
-    <entry key="ide.tree.collapse.recursively" value="false" />
   </component>
   <component name="StatusBar">
     <option name="widgets">
