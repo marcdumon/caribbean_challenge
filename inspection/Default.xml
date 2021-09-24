@@ -34,6 +34,7 @@
         <option value="mido.open_output" />
         <option value="mido.get_output_names" />
         <option value="torch.utils.*" />
+        <option value="bool.tolist" />
       </list>
     </option>
   </inspection_tool>
