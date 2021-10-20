@@ -35,6 +35,7 @@
         <option value="mido.get_output_names" />
         <option value="torch.utils.*" />
         <option value="bool.tolist" />
+        <option value="torch.optim.lr_scheduler.OneCycleLR" />
       </list>
     </option>
   </inspection_tool>
