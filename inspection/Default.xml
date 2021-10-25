@@ -36,6 +36,7 @@
         <option value="torch.utils.*" />
         <option value="bool.tolist" />
         <option value="torch.optim.lr_scheduler.OneCycleLR" />
+        <option value="object.transform" />
       </list>
     </option>
   </inspection_tool>
