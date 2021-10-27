@@ -35,6 +35,11 @@
       <option name="FONT_TYPE" value="3" />
       <option name="ERROR_STRIPE_COLOR" value="ff" />
     </pattern>
+    <pattern useCustomColors="true" pattern="\brefactor\b.*">
+      <option name="FOREGROUND" value="bf81c0" />
+      <option name="FONT_TYPE" value="1" />
+      <option name="ERROR_STRIPE_COLOR" value="977ab" />
+    </pattern>
   </component>
   <component name="XmlFoldingSettings">
     <option name="COLLAPSE_XML_TAGS" value="true" />
