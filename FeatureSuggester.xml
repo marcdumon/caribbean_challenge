@@ -1,5 +1,10 @@
 <application>
   <component name="FeatureSuggesterSettings">
+    <option name="suggestionLastShownTime">
+      <map>
+        <entry key="Mute breakpoints" value="1647114968734" />
+      </map>
+    </option>
     <option name="workingDays">
       <list>
         <option value="1645378102254" />
